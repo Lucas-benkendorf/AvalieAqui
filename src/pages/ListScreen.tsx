@@ -11,7 +11,7 @@ const ListScreen = () => {
   
   const fetchProducts = async () => {
     try {
-      const response = await fetch('http://192.168.3.5:3333/products');  
+      const response = await fetch('http://192.168.3.5:3000/products');  
       const data = await response.json();
       setProducts(data);
       setLoading(false);
@@ -38,7 +38,7 @@ const ListScreen = () => {
 
   
   const handleAvaliar = (productId) => {
-    navigation.navigate('AvaliationScreen', { productId });
+    navigation.navigate('Avaliation', { productId });
   };
 
   return (
