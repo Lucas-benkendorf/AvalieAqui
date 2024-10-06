@@ -1,10 +1,46 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
-
-
-const products = require('../../assets/db.json').products;
+import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import AvaliationScreen from './AvaliationScreen';
 
 const ListScreen = () => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigation = useNavigation();
+
+  
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch('http://192.168.3.5:3333/products');  
+      const data = await response.json();
+      setProducts(data);
+      setLoading(false);
+    } catch (error) {
+      console.error("Erro ao buscar os produtos:", error);
+      setLoading(false);
+    }
+  };
+
+  
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#E53935" />
+        <Text>Carregando produtos...</Text>
+      </View>
+    );
+  }
+
+  
+  const handleAvaliar = (productId) => {
+    navigation.navigate('AvaliationScreen', { productId });
+  };
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -18,7 +54,10 @@ const ListScreen = () => {
               <Text style={styles.productType}>Marca: {item.brand}</Text>
               <Text style={styles.productDescription}>{item.description}</Text>
               <Text style={styles.productPrice}>{item.price}</Text>
-              <TouchableOpacity style={styles.button}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => handleAvaliar(item.id)}
+              >
                 <Text style={styles.buttonText}>Avaliar</Text>
               </TouchableOpacity>
             </View>
@@ -34,6 +73,11 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
     backgroundColor: '#fff',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   card: {
     flexDirection: 'row',
