@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import AvaliationScreen from './AvaliationScreen';
 
 const ListScreen = () => {
   const [products, setProducts] = useState([]);

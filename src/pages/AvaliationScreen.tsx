@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+
+type RootStackParamList = {
+  Avaliation: {productId: number};
+};
+
 
 export default function AvaliationScreen() {
   const [name, setName] = useState('');
@@ -7,14 +13,51 @@ export default function AvaliationScreen() {
   const [experience, setExperience] = useState('');
   const [recommend, setRecommend] = useState(false);
   const [selectedExperience, setSelectedExperience] = useState('');
+  
+  const navigation = useNavigation();
+  const route = useRoute<RouteProp<RootStackParamList, 'Avaliation'>>();
+  const { productId } = route.params;
 
-  const handleSubmit = () => {
-    Alert.alert('Feedback enviado!', `Nome: ${name}\nEmail: ${email}\nExperiência: ${experience}\nRecomendaria: ${recommend ? 'Sim' : 'Não'}`);
+  const handleSubmit = async () => {
+    if (!name || !email || !experience || !selectedExperience) {
+      Alert.alert('Erro', 'Por favor, preencha todos os campos.');
+      return;
+    }
+
+    const reviewData = {
+      productId,
+      name,
+      email,
+      feedback: experience,
+      experience: selectedExperience,
+      recommend,
+    };
+
+    try {
+      const response = await fetch('http://192.168.3.5:3000/reviews', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(reviewData),
+      });
+
+      if (response.ok) {
+        Alert.alert('Sucesso', 'Feedback enviado com sucesso!');
+        navigation.goBack();
+      } else {
+        const data = await response.json();
+        Alert.alert('Erro', data.message || 'Erro ao enviar feedback');
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Erro', 'Não foi possível enviar o feedback.');
+    }
   };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.backButton}>
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Text>Voltar</Text>
       </TouchableOpacity>
       
@@ -62,7 +105,6 @@ export default function AvaliationScreen() {
       </View>
 
       <View style={styles.checkboxContainer}>
-        
         <TouchableOpacity
           style={styles.checkbox}
           onPress={() => setRecommend(!recommend)}
